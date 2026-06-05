@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نورا | پلتفرم جامع هنر و مداحی</title>
+
+<!-- تنظیمات اپلیکیشن -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#064420">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<!-- فونت و آیکون -->
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/b-titr/dist/font-face.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    :root {
+        --primary: #064420;
+        --secondary: #0f703a;
+        --accent: #d4af37;
+        --bg-dark: #020f08;
+        --glass: rgba(255, 255, 255, 0.05);
+        --text-glow: 0 0 10px rgba(255, 255, 255, 0.3);
+        --neon-box: 0 0 20px rgba(212, 175, 55, 0.4);
+    }
+
+    * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+
+    body {
+        margin: 0;
+        background: var(--bg-dark);
+        background-image: 
+            radial-gradient(circle at 10% 20%, rgba(15, 112, 58, 0.4) 0%, transparent 40%);
+        color: #fff;
+        font-family: "B Titr", Tahoma, sans-serif;
+        overflow-x: hidden;
+        padding-bottom: 80px; /* جا برای دکمه سفارش شناور */
+    }
+
+    /* دکمه سفارش بله (شناور) */
+    .order-fab {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background: linear-gradient(45deg, #d4af37, #f8e71c);
+        color: #000;
+        padding: 15px 25px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: bold;
+        box-shadow: 0 10px 30px rgba(212, 175, 55, 0.5);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: pulse-btn 2s infinite;
+        border: 2px solid #fff;
+    }
+    @keyframes pulse-btn {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(212, 175, 55, 0.7); }
+        100% { transform: scale(1); }
+    }
+
+    /* هدر و اسلایدر */
+    .header {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        padding: 15px;
+        text-align: center;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        display: flex; justify-content: center; align-items: center; gap: 10px;
+    }
+
+    .slider-container {
+        overflow: hidden;
+        background: #000;
+        padding: 15px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .slider-track {
+        display: flex;
+        animation: scroll 20s linear infinite;
+        width: max-content;
+    }
+    .slider-track:hover { animation-play-state: paused; }
+    .slider-item {
+        margin: 0 10px;
+        border-radius: 10px;
+        overflow: hidden;
+        width: 280px;
+        height: 140px;
+        flex-shrink: 0;
+        border: 1px solid var(--accent);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    }
+    .slider-item img { width: 100%; height: 100%; object-fit: cover; }
+    @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+    /* منو */
+    .menu-btn {
+        position: fixed;
+        top: 15px;
+        right: 15px;
+        background: var(--glass);
+        backdrop-filter: blur(10px);
+        color: var(--accent);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        z-index: 1100;
+        cursor: pointer;
+        border: 1px solid var(--accent);
+    }
+    .sidebar {
+        position: fixed; right: -280px; top: 0; width: 280px; height: 100%;
+        background: rgba(0,0,0,0.95); backdrop-filter: blur(15px);
+        padding-top: 80px; transition: 0.4s; z-index: 1050;
+    }
+    .sidebar.active { right: 0; }
+    .sidebar a {
+        display: block; padding: 20px 30px; color: #fff; text-decoration: none;
+        border-bottom: 1px solid #333; transition: 0.3s;
+    }
+    .sidebar a:hover { background: var(--secondary); padding-right: 40px; }
+    .overlay {
+        position: fixed; top: 0; right: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.8); z-index: 1000; display: none;
+    }
+    .overlay.active { display: block; }
+
+    /* بخش‌ها */
+    .section { padding: 40px 20px; max-width: 800px; margin: 0 auto; }
+    .section h2 {
+        text-align: center;
+        color: var(--accent);
+        margin-bottom: 30px;
+        text-shadow: var(--text-glow);
+        font-size: 2rem;
+        position: relative;
+    }
+    .section h2::after {
+        content: '';
+        display: block; width: 60px; height: 3px; background: var(--accent);
+        margin: 10px auto; border-radius: 2px;
+    }
+
+    /* کارت درباره ما (حرفه ای) */
+    .resume-card {
+        background: linear-gradient(135deg, rgba(6,68,32,0.8), rgba(0,0,0,0.6));
+        border: 1px solid var(--glass);
+        border-radius: 25px;
+        padding: 30px;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        text-align: right;
+        line-height: 1.8;
+        position: relative;
+        overflow: hidden;
+    }
+    .resume-card::before {
+        content: '';
+        position: absolute; top: -50px; right: -50px;
+        width: 150px; height: 150px; background: var(--accent);
+        filter: blur(80px); opacity: 0.2;
+    }
+    .team-box {
+        background: rgba(255,255,255,0.05);
+        border-radius: 15px; padding: 20px; margin-top: 20px;
+        border: 1px dashed var(--accent);
+    }
+
+    /* گالری (خالی) */
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+    .gallery-placeholder {
+        background: #111;
+        height: 150px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #555;
+        border: 2px dashed #333;
+        position: relative;
+        overflow: hidden;
+    }
+    .gallery-placeholder img {
+        width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0;
+    }
+
+    /* پلیر مداحی */
+    .music-list { display: flex; flex-direction: column; gap: 15px; }
+    .music-row {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--glass);
+        border-radius: 20px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: 0.3s;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .music-row:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); }
+    .music-info { display: flex; align-items: center; gap: 15px; flex-grow: 1; }
+    .play-btn {
+        width: 50px; height: 50px;
+        background: linear-gradient(135deg, var(--secondary), var(--primary));
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        color: #fff;
+        border: none;
+        font-size: 18px;
+        box-shadow: 0 0 15px rgba(15, 112, 58, 0.4);
+    }
+    .play-btn.playing { 
+        background: var(--accent); color: #000; 
+        animation: pulse-ring 1.5s infinite; 
+        border: 2px solid #fff;
+    }
+    @keyframes pulse-ring {
+        0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
+        70% { box-shadow: 0 0 0 15px rgba(212, 175, 55, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+    }
+
+    .download-btn {
+        background: transparent;
+        border: 1px solid var(--accent);
+        color: var(--accent);
+        padding: 10px 20px;
+        border-radius: 20px;
+        text-decoration: none;
+        font-size: 14px;
+        display: flex; align-items: center; gap: 8px;
+        transition: 0.3s;
+    }
+    .download-btn:hover { background: var(--accent); color: #000; box-shadow: 0 0 15px var(--accent); }
+
+    /* فوتر */
+    footer { text-align: center; color: #666; padding: 30px 20px; margin-top: 40px; font-size: 12px; border-top: 1px solid #222; }
+</style>
+</head>
+<body>
+
+<!-- دکمه شناور سفارش بله -->
+<a href="https://ble.ir/nora90" target="_blank" class="order-fab">
+    <i class="fas fa-shopping-cart"></i>
+    سفارش طراحی (بله)
+</a>
+
+<!-- منو -->
+<div class="overlay" onclick="toggleMenu()"></div>
+<div class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></div>
+<nav class="sidebar">
+    <a href="#" onclick="toggleMenu()"><i class="fas fa-home" style="margin-left:10px"></i> خانه</a>
+    <a href="#about" onclick="toggleMenu()"><i class="fas fa-users" style="margin-left:10px"></i> درباره نورا</a>
+    <a href="#gallery" onclick="toggleMenu()"><i class="fas fa-images" style="margin-left:10px"></i> گالری</a>
+    <a href="#music" onclick="toggleMenu()"><i class="fas fa-music" style="margin-left:10px"></i> مداحی</a>
+    <a href="https://ble.ir/nora90" onclick="toggleMenu()"><i class="fas fa-paper-plane" style="margin-left:10px"></i> تماس و سفارش</a>
+</nav>
+
+<!-- هدر -->
+<header class="header">
+    <i class="fas fa-mosque" style="color: var(--accent); font-size: 1.5rem;"></i>
+    <span style="font-size: 1.3rem; font-weight: bold;">نورا | پیام مقاومت</span>
+</header>
+
+<!-- اسلایدر (با فایل‌های شما) -->
+<div class="slider-container">
+    <div class="slider-track">
+        <div class="slider-item"><img src="logo.jpg" onerror="this.src='https://placehold.co/280x140?text=لوگو'" alt="Logo"></div>
+        <div class="slider-item"><img src="rahbar.jpg" onerror="this.src='https://placehold.co/280x140?text=رهبر'" alt="Rahbar"></div>
+        <div class="slider-item"><img src="shidan.png" onerror="this.src='https://placehold.co/280x140?text=شیدان'" alt="Shidan"></div>
+        <!-- تکرار -->
+        <div class="slider-item"><img src="logo.jpg" onerror="this.src='https://placehold.co/280x140?text=لوگو'" alt="Logo"></div>
+        <div class="slider-item"><img src="rahbar.jpg" onerror="this.src='https://placehold.co/280x140?text=رهبر'" alt="Rahbar"></div>
+        <div class="slider-item"><img src="shidan.png" onerror="this.src='https://placehold.co/280x140?text=شیدان'" alt="Shidan"></div>
+    </div>
+</div>
+
+<!-- درباره نورا (کامل) -->
+<section id="about" class="section">
+    <h2><i class="fas fa-feather-alt"></i> درباره نورا</h2>
+    <div class="resume-card">
+        <p style="font-size: 18px;">
+            مجموعه فرهنگی هنری نورا متعهد به تولید محتواهای ناب و معنوی در بستر فضای مجازی است. ما با ترکیب هنر دیجیتال و مفاهیم دینی، تصاویری قدرتمند و الهام‌بخش خلق می‌کنیم تا پیام مقاومت و روشنی ایمان را به گوش جهانیان برسانیم.
+        </p>
+        <p>
+            در پروژه‌های خود از پیشرفته‌ترین ابزارها استفاده می‌کنیم:
+            <span style="background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:5px; margin:0 2px; font-size:14px;">هوش مصنوعی (AI)</span>
+            <span style="background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:5px; margin:0 2px; font-size:14px;">طراحی سه بعدی</span>
+            <span style="background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:5px; margin:0 2px; font-size:14px;">موشن گرافیک</span>
+        </p>
+        
+        <div class="team-box">
+            <h3 style="margin-top:0; color:var(--accent); text-align:center;">تیم فنی و هنری</h3>
+            <p style="text-align:center; font-weight:bold; font-size:18px; color:#fff;">
+                سینا یاونگی • یاسین نجاتی
+            </p>
+            <p style="text-align:center; font-size:14px; color:#aaa; margin-bottom:0;">
+                (زیباسازی و پیشرفته کردن سایت)
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- گالری تصاویر (جای خالی) -->
+<section id="gallery" class="section">
+    <h2><i class="fas fa-images"></i> گالری آثار</h2>
+    <div class="gallery-grid">
+        <!-- برای گذاشتن عکس خود، نام فایل را در src بنویسید -->
+        <div class="gallery-placeholder">
+            <img src="image1.jpg" onerror="this.style.display='none'" alt="Gallery 1">
+        </div>
+        <div class="gallery-placeholder">
+            <img src="image2.jpg" onerror="this.style.display='none'" alt="Gallery 2">
+        </div>
+        <div class="gallery-placeholder">
+            <img src="image3.jpg" onerror="this.style.display='none'" alt="Gallery 3">
+        </div>
+        <div class="gallery-placeholder">
+            <img src="image4.jpg" onerror="this.style.display='none'" alt="Gallery 4">
+        </div>
+    </div>
+</section>
+
+<!-- بخش پخش مداحی (۳ خط با دانلود) -->
+<section id="music" class="section">
+    <h2><i class="fas fa-music"></i> صوت و مداحی</h2>
+    <div class="music-list">
+        
+        <div class="music-row">
+            <div class="music-info">
+                <button class="play-btn" onclick="togglePlay('nohe1.mp3', this)"><i class="fas fa-play play-icon"></i></button>
+                <div>
+                    <h3 style="margin:0; font-size:16px;">مداحی محرک ۱</h3>
+                    <small style="color:#888;">حاج حسن پژمان</small>
+                </div>
+            </div>
+            <a href="nohe1.mp3" download class="download-btn">
+                <i class="fas fa-download"></i> دانلود
+            </a>
+        </div>
+
+        <div class="music-row">
+            <div class="music-info">
+                <button class="play-btn" onclick="togglePlay('nohe2.mp3', this)"><i class="fas fa-play play-icon"></i></button>
+                <div>
+                    <h3 style="margin:0; font-size:16px;">مداحی حماسی ۲</h3>
+                    <small style="color:#888;">حاج ابوالفضل طاهری</small>
+                </div>
+            </div>
+            <a href="nohe2.mp3" download class="download-btn">
+                <i class="fas fa-download"></i> دانلود
+            </a>
+        </div>
+
+        <div class="music-row">
+            <div class="music-info">
+                <button class="play-btn" onclick="togglePlay('nohe3.mp3', this)"><i class="fas fa-play play-icon"></i></button>
+                <div>
+                    <h3 style="margin:0; font-size:16px;">مرثیه امام حسین</h3>
+                    <small style="color:#888;">حاج محمود کریمی</small>
+                </div>
+            </div>
+            <a href="nohe3.mp3" download class="download-btn">
+                <i class="fas fa-download"></i> دانلود
+            </a>
+        </div>
+
+    </div>
+</section>
+
+<footer>
+    <p>© تمام حقوق برای مجموعه نورا محفوظ است</p>
+    <p style="margin-top:10px; color:var(--accent);">طراحی شده با عشق و ایمان</p>
+</footer>
+
+<script>
+    // منو
+    function toggleMenu() {
+        document.querySelector('.sidebar').classList.toggle('active');
+        document.querySelector('.overlay').classList.toggle('active');
+    }
+
+    // پلیر موزیک
+    let currentAudio = null;
+    let currentBtn = null;
+
+    function togglePlay(src, btn) {
+        const icon = btn.querySelector('.play-icon');
+        
+        if (currentAudio && currentAudio.src.includes(src)) {
+            if (currentAudio.paused) {
+                currentAudio.play();
+                icon.classList.remove('fa-play');
+                icon.classList.add('fa-pause');
+                btn.classList.add('playing');
+            } else {
+                currentAudio.pause();
+                icon.classList.remove('fa-pause');
+                icon.classList.add('fa-play');
+                btn.classList.remove('playing');
+            }
+            return;
+        }
+
+        if (currentAudio) {
+            currentAudio.pause();
+            if (currentBtn) {
+                currentBtn.classList.remove('playing');
+                currentBtn.querySelector('.play-icon').classList.remove('fa-pause');
+                currentBtn.querySelector('.play-icon').classList.add('fa-play');
+            }
+        }
+
+        currentAudio = new Audio(src);
+        currentAudio.play();
+        currentBtn = btn;
+        
+        icon.classList.remove('fa-play');
+        icon.classList.add('fa-pause');
+        btn.classList.add('playing');
+    }
+
+    // سرویس ورکر
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js')
+        .catch(err => console.log(err));
+    }
+</script>
+</body>
+</html>
